@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-key-please-change-in-production-min-32-chars-long',
+  debug: true, // Enable debug mode to see errors
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -125,6 +127,27 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name as string
       }
       return session
+    },
+  },
+  events: {
+    async signIn(message) {
+      console.log('✅ User signed in:', message.user.email)
+    },
+    async signOut(message) {
+      console.log('👋 User signed out')
+    },
+  },
+  logger: {
+    error(code, metadata) {
+      console.error('❌ NextAuth Error:', code, metadata)
+    },
+    warn(code) {
+      console.warn('⚠️  NextAuth Warning:', code)
+    },
+    debug(code, metadata) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🐛 NextAuth Debug:', code, metadata)
+      }
     },
   },
 }

@@ -27,19 +27,25 @@ function LoginForm() {
     setLoading(true)
 
     try {
+      console.log('Attempting sign in...')
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
+        callbackUrl: searchParams.get('callbackUrl') || '/',
       })
 
+      console.log('Sign in result:', result)
+
       if (result?.error) {
-        setError('Invalid email or password')
-        console.log('Login error:', result.error)
+        console.error('Sign in error:', result.error)
+        setError('Invalid email or password. Please try again.')
+      } else if (result?.ok) {
+        console.log('✅ Login successful:', { email })
+        const callbackUrl = searchParams.get('callbackUrl') || '/'
+        window.location.href = callbackUrl
       } else {
-        console.log('Login successful:', { email })
-        router.push('/')
-        router.refresh()
+        setError('An unexpected error occurred. Please try again.')
       }
     } catch (err) {
       setError('An error occurred. Please try again.')
