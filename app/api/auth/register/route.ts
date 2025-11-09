@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { randomBytes } from 'crypto'
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,14 +39,19 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
+    // Generate unique ID for the user
+    const userId = randomBytes(16).toString('hex')
+
     // Create user
     console.log('Creating new user:', { email, name })
     const user = await prisma.user.create({
       data: {
+        id: userId,
         name,
         email,
         password: hashedPassword,
         createdVia: 'signup',
+        updatedAt: new Date(),
       },
       select: {
         id: true,
