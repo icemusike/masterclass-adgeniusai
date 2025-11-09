@@ -66,6 +66,24 @@ function LoginForm() {
               create a new account
             </Link>
           </p>
+          
+          {/* Purchase CTA for users without access */}
+          <div className="mt-6 p-4 bg-primary-50 border-2 border-primary-200 rounded-lg">
+            <p className="text-sm text-gray-700 mb-2">
+              Don't have an account yet?
+            </p>
+            <a
+              href="https://adgeniusai.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold text-sm"
+            >
+              Purchase AdGenius AI Masterclass
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
