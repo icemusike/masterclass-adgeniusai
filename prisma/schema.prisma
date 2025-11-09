@@ -1,0 +1,528 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Ad {
+  id                   String             @id
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime
+  imageData            String
+  imageMimeType        String
+  imageMetadata        Json
+  headline             String
+  description          String
+  primaryText          String
+  callToAction         String
+  alternativeHeadlines Json?
+  keyBenefits          Json?
+  toneAnalysis         String?
+  productDescription   String
+  targetAudience       String
+  industry             String
+  category             String
+  template             String
+  tone                 String
+  colorPalette         String?
+  aspectRatio          String
+  valueProposition     String?
+  angleId              String?
+  copyModel            String             @default("gpt-4o-2024-08-06")
+  clientAccountId      String?
+  projectId            String?
+  Angle                Angle?             @relation(fields: [angleId], references: [id])
+  ClientAccount        ClientAccount?     @relation(fields: [clientAccountId], references: [id])
+  ClientProject        ClientProject?     @relation(fields: [projectId], references: [id])
+  ClientAdApproval     ClientAdApproval[]
+
+  @@index([angleId])
+  @@index([category])
+  @@index([clientAccountId])
+  @@index([createdAt])
+  @@index([industry])
+  @@index([projectId])
+}
+
+model AdminActivityLog {
+  id          String    @id
+  createdAt   DateTime  @default(now())
+  adminUserId String
+  action      String
+  targetType  String?
+  targetId    String?
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  AdminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([action])
+  @@index([adminUserId])
+  @@index([createdAt])
+  @@index([targetType])
+}
+
+model AdminUser {
+  id               String             @id
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  email            String             @unique
+  password         String
+  name             String
+  role             String             @default("admin")
+  lastLogin        DateTime?
+  isActive         Boolean            @default(true)
+  AdminActivityLog AdminActivityLog[]
+
+  @@index([email])
+  @@index([isActive])
+}
+
+model AgencySettings {
+  id                   String   @id
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime
+  userId               String   @unique
+  agencyName           String?
+  agencyLogo           String?
+  logoUrl              String?
+  primaryColor         String   @default("#3B82F6")
+  secondaryColor       String   @default("#1E40AF")
+  accentColor          String?
+  customDomain         String?
+  domainVerified       Boolean  @default(false)
+  agencyEmail          String?
+  agencyPhone          String?
+  agencyWebsite        String?
+  agencyAddress        String?
+  portalWelcomeMessage String?
+  portalFooterText     String?
+  showPoweredBy        Boolean  @default(true)
+  emailFromName        String?
+  emailFromEmail       String?
+  emailLogoUrl         String?
+  User                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Angle {
+  id                  String   @id
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime
+  businessName        String
+  businessDescription String
+  industry            String?
+  targetAudience      String?
+  currentApproach     String?
+  angleName           String
+  angleDescription    String
+  whyItWorks          String
+  targetEmotion       String
+  exampleHeadline     String
+  visualStyle         String
+  copyFramework       String?
+  metadata            Json?
+  usageCount          Int      @default(0)
+  promptsGenerated    Int      @default(0)
+  adsGenerated        Int      @default(0)
+  performanceRating   Float?
+  performanceNotes    String?
+  Ad                  Ad[]
+  Prompt              Prompt[]
+
+  @@index([createdAt])
+  @@index([industry])
+  @@index([targetEmotion])
+  @@index([usageCount])
+}
+
+model ApiUsageLog {
+  id             String   @id
+  createdAt      DateTime @default(now())
+  userId         String?
+  provider       String
+  model          String
+  feature        String
+  requestTokens  Int?
+  responseTokens Int?
+  totalTokens    Int?
+  estimatedCost  Float?
+  requestId      String?
+  endpoint       String?
+  metadata       Json?
+  duration       Int?
+  success        Boolean  @default(true)
+  User           User?    @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([feature])
+  @@index([model])
+  @@index([provider])
+  @@index([success])
+  @@index([userId])
+}
+
+model Brand {
+  id                              String         @id
+  createdAt                       DateTime       @default(now())
+  updatedAt                       DateTime
+  name                            String
+  description                     String
+  tagline                         String?
+  logo                            String?
+  logoMimeType                    String?
+  primaryColor                    String?
+  secondaryColor                  String?
+  accentColor                     String?
+  colorPalette                    String?
+  industry                        String?
+  targetAudience                  String?
+  brandVoice                      String?
+  tone                            String         @default("professional yet approachable")
+  valueProposition                String?
+  keyMessages                     Json?
+  brandGuidelines                 String?
+  websiteUrl                      String?
+  socialMediaLinks                Json?
+  metadata                        Json?
+  usageCount                      Int            @default(0)
+  lastUsed                        DateTime?
+  userId                          String
+  clientAccountId                 String?
+  ClientAccount                   ClientAccount? @relation(fields: [clientAccountId], references: [id])
+  User_Brand_userIdToUser         User           @relation("Brand_userIdToUser", fields: [userId], references: [id], onDelete: Cascade)
+  User_User_defaultBrandIdToBrand User[]         @relation("User_defaultBrandIdToBrand")
+
+  @@index([clientAccountId])
+  @@index([createdAt])
+  @@index([industry])
+  @@index([name])
+  @@index([userId])
+}
+
+model ClientAccount {
+  id               String             @id
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  clientEmail      String
+  clientName       String?
+  clientCompany    String?
+  accessToken      String             @unique
+  status           String             @default("active")
+  creditsAllocated Int?
+  creditsUsed      Int                @default(0)
+  lastAccess       DateTime?
+  agencyUserId     String
+  Ad               Ad[]
+  Brand            Brand[]
+  User             User               @relation(fields: [agencyUserId], references: [id], onDelete: Cascade)
+  ClientAdApproval ClientAdApproval[]
+  ClientFile       ClientFile[]
+  ClientMessage    ClientMessage[]
+  ClientProject    ClientProject[]
+  UsageLog         UsageLog[]
+
+  @@unique([agencyUserId, clientEmail])
+  @@index([accessToken])
+  @@index([agencyUserId])
+  @@index([clientEmail])
+  @@index([status])
+}
+
+model ClientAdApproval {
+  id                 String        @id
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime
+  adId               String
+  clientAccountId    String
+  status             String        @default("pending")
+  feedback           String?
+  requestedChanges   Json?
+  submittedAt        DateTime      @default(now())
+  approvedAt         DateTime?
+  approvedBy         String?
+  revisionNumber     Int           @default(1)
+  previousApprovalId String?
+  submittedBy        String?
+  submitterMessage   String?
+  Ad                 Ad            @relation(fields: [adId], references: [id], onDelete: Cascade)
+  ClientAccount      ClientAccount @relation(fields: [clientAccountId], references: [id], onDelete: Cascade)
+
+  @@index([adId])
+  @@index([clientAccountId])
+  @@index([createdAt])
+  @@index([status])
+}
+
+model ClientFile {
+  id              String        @id
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime
+  clientAccountId String
+  fileName        String
+  fileType        String
+  mimeType        String
+  fileUrl         String
+  fileSize        Int
+  thumbnailUrl    String?
+  uploadedBy      String
+  uploaderType    String
+  uploaderName    String?
+  description     String?
+  tags            Json?
+  ClientAccount   ClientAccount @relation(fields: [clientAccountId], references: [id], onDelete: Cascade)
+
+  @@index([clientAccountId])
+  @@index([createdAt])
+  @@index([fileType])
+}
+
+model ClientMessage {
+  id              String        @id
+  createdAt       DateTime      @default(now())
+  clientAccountId String
+  senderId        String
+  senderType      String
+  senderName      String
+  subject         String?
+  message         String
+  attachments     Json?
+  isRead          Boolean       @default(false)
+  readAt          DateTime?
+  replyToId       String?
+  ClientAccount   ClientAccount @relation(fields: [clientAccountId], references: [id], onDelete: Cascade)
+
+  @@index([clientAccountId])
+  @@index([createdAt])
+  @@index([isRead])
+  @@index([senderId])
+}
+
+model ClientProject {
+  id              String        @id
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime
+  name            String
+  description     String?
+  status          String        @default("active")
+  budget          Float?
+  currency        String        @default("USD")
+  startDate       DateTime?
+  endDate         DateTime?
+  deadline        DateTime?
+  clientAccountId String
+  metadata        Json?
+  Ad              Ad[]
+  ClientAccount   ClientAccount @relation(fields: [clientAccountId], references: [id], onDelete: Cascade)
+
+  @@index([clientAccountId])
+  @@index([createdAt])
+  @@index([status])
+}
+
+model JVZooTransaction {
+  id                  String    @id
+  createdAt           DateTime  @default(now())
+  jvzooTransactionId  String    @unique
+  jvzooReceiptId      String?
+  transactionType     String
+  jvzooProductId      String
+  productType         String?
+  customerEmail       String
+  customerName        String?
+  customerCountry     String?
+  customerState       String?
+  amount              Float?
+  affiliateCommission Float?
+  vendorEarnings      Float?
+  verificationHash    String
+  verified            Boolean   @default(false)
+  processed           Boolean   @default(false)
+  processedAt         DateTime?
+  processingError     String?
+  rawIpnData          Json
+  userId              String?
+  User                User?     @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([customerEmail])
+  @@index([jvzooProductId])
+  @@index([jvzooTransactionId])
+  @@index([processed])
+  @@index([userId])
+}
+
+model License {
+  id                 String         @id
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime
+  licenseKey         String         @unique
+  productId          String
+  status             String         @default("active")
+  jvzooTransactionId String         @unique
+  jvzooReceiptId     String?
+  jvzooProductId     String
+  transactionType    String
+  purchaseDate       DateTime       @default(now())
+  purchaseAmount     Float?
+  expiryDate         DateTime?
+  isRecurring        Boolean        @default(false)
+  lastPaymentDate    DateTime?
+  paymentCount       Int            @default(1)
+  nextBillingDate    DateTime?
+  refundedAt         DateTime?
+  chargebackAt       DateTime?
+  cancelledAt        DateTime?
+  lastValidated      DateTime?
+  activations        Int            @default(0)
+  maxActivations     Int            @default(1)
+  metadata           Json?
+  userId             String
+  creditsResetDate   DateTime?
+  creditsTotal       Int?
+  creditsUsed        Int            @default(0)
+  licenseTier        String
+  User               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  LicenseAddon       LicenseAddon[]
+  UsageLog           UsageLog[]
+
+  @@index([createdAt])
+  @@index([jvzooTransactionId])
+  @@index([licenseKey])
+  @@index([licenseTier])
+  @@index([productId])
+  @@index([status])
+  @@index([userId])
+}
+
+model LicenseAddon {
+  id                 String    @id
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime
+  addonType          String
+  status             String    @default("active")
+  jvzooProductId     String
+  jvzooTransactionId String    @unique
+  jvzooReceiptId     String?
+  purchaseDate       DateTime  @default(now())
+  purchaseAmount     Float?
+  refundedAt         DateTime?
+  licenseId          String
+  License            License   @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+
+  @@unique([licenseId, addonType])
+  @@index([addonType])
+  @@index([jvzooTransactionId])
+  @@index([licenseId])
+  @@index([status])
+}
+
+model PlatformSettings {
+  id             String   @id
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime
+  key            String   @unique
+  value          Json
+  category       String
+  encrypted      Boolean  @default(false)
+  description    String?
+  lastModifiedBy String?
+
+  @@index([category])
+  @@index([key])
+}
+
+model Prompt {
+  id              String   @id
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime
+  idea            String
+  generatedPrompt String
+  industry        String?
+  style           String?
+  aspectRatio     String?
+  metadata        Json?
+  usageCount      Int      @default(0)
+  angleId         String?
+  Angle           Angle?   @relation(fields: [angleId], references: [id])
+
+  @@index([angleId])
+  @@index([createdAt])
+  @@index([industry])
+  @@index([style])
+}
+
+model UsageLog {
+  id              String         @id
+  createdAt       DateTime       @default(now())
+  userId          String?
+  licenseId       String?
+  clientAccountId String?
+  actionType      String
+  creditsConsumed Int            @default(1)
+  aiModel         String?
+  templateId      String?
+  exportFormat    String?
+  ipAddress       String?
+  userAgent       String?
+  metadata        Json?
+  ClientAccount   ClientAccount? @relation(fields: [clientAccountId], references: [id])
+  License         License?       @relation(fields: [licenseId], references: [id])
+  User            User?          @relation(fields: [userId], references: [id])
+
+  @@index([actionType])
+  @@index([aiModel])
+  @@index([clientAccountId])
+  @@index([createdAt])
+  @@index([licenseId])
+  @@index([userId])
+}
+
+model User {
+  id                               String             @id
+  createdAt                        DateTime           @default(now())
+  updatedAt                        DateTime
+  name                             String
+  email                            String             @unique
+  company                          String?
+  geminiApiKey                     String?
+  openaiApiKey                     String?
+  preferredImageModel              String             @default("gemini")
+  imageQuality                     String             @default("standard")
+  defaultIndustry                  String?
+  defaultTone                      String             @default("professional yet approachable")
+  defaultAspectRatio               String             @default("square")
+  adsGenerated                     Int                @default(0)
+  promptsGenerated                 Int                @default(0)
+  anglesGenerated                  Int                @default(0)
+  settings                         Json?
+  defaultBrandId                   String?
+  theme                            String             @default("solar-dusk")
+  themeMode                        String             @default("dark")
+  emailVerified                    Boolean            @default(false)
+  password                         String?
+  resetPasswordExpires             DateTime?
+  resetPasswordToken               String?
+  verificationToken                String?
+  defaultModel                     String             @default("gpt-4o-2024-08-06")
+  createdVia                       String?            @default("signup")
+  jvzooCustomerId                  String?
+  jvzooTransactionId               String?
+  AgencySettings                   AgencySettings?
+  ApiUsageLog                      ApiUsageLog[]
+  Brand_Brand_userIdToUser         Brand[]            @relation("Brand_userIdToUser")
+  ClientAccount                    ClientAccount[]
+  JVZooTransaction                 JVZooTransaction[]
+  License                          License[]
+  UsageLog                         UsageLog[]
+  Brand_User_defaultBrandIdToBrand Brand?             @relation("User_defaultBrandIdToBrand", fields: [defaultBrandId], references: [id])
+
+  @@index([defaultBrandId])
+  @@index([email])
+  @@index([jvzooCustomerId])
+}

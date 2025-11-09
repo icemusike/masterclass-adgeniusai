@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand Colors */
+  --brand-orange: #EA580C;
+  --brand-orange-dark: #C2410C;
+  --brand-orange-light: #FB923C;
+  --brand-dark: #111827;
+  --brand-light: #F9FAFB;
+  --brand-gray: #6B7280;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #EA580C 0%, #DC2626 100%);
+  --gradient-brand: linear-gradient(135deg, #EA580C 0%, #FB923C 100%);
+  
+  --foreground-rgb: 17, 24, 39; /* brand-dark */
+  --background-start-rgb: 249, 250, 251; /* brand-light */
+  --background-end-rgb: 255, 255, 255;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Text Selection with Brand Colors */
+::selection {
+  background-color: var(--brand-orange);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--brand-orange);
+  color: white;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom Scrollbar with Brand Colors */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--brand-light);
+  border-left: 1px solid rgba(234, 88, 12, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--brand-orange) 0%, var(--brand-orange-dark) 100%);
+  border-radius: 5px;
+  border: 2px solid var(--brand-light);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--brand-orange-dark) 0%, #9a3412 100%);
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-orange) var(--brand-light);
+}
+
+/* Shimmer Animation for Progress Bars */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
